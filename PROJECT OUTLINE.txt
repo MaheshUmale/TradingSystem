@@ -1,0 +1,89 @@
+This outline details a comprehensive trading system that integrates the objective, risk-focused systematic framework defined by Robert Carver with the advanced, adaptive, and analytical capabilities of the Multi-Agent System (MAS) outlined in TradingGroup.
+This hybrid approach leverages the LLMs for sophisticated analysis and forecasting (Steps 1-4) and strictly adheres to the mechanical discipline of Carver’s framework for risk and position management (Steps 5-6), thereby avoiding the human cognitive biases and LLM risk deviations.
+--------------------------------------------------------------------------------
+Trading System Design Outline: Hybrid Systematic Agent
+Phase 1: Foundational Intelligence and Learning (Carver + TradingGroup)
+This phase focuses on deep asset-specific analysis and continuous learning, effectively addressing the need to backtest individual stock behaviour and parameters (Query Step 1).
+Step
+Component
+Description and Source Integration
+1.1 Instrument Selection & Data Acquisition
+Carver's Framework
+Select instruments (stocks/derivatives) based on criteria like appropriate trading costs, liquidity, and suitable minimum sizes. Ensure data availability for systematic analysis, requiring at least accurate daily price information.
+1.2 Multi-modal Data Processing
+TradingGroup MAS
+Agents perform role-specific reasoning:
+- News-Sentiment Agent
+Filters real-time financial news, dedupes using vector similarity, and outputs an overall market sentiment score.
+- Financial-Report Agent
+Uses improved RAG (Retrieval-Augmented Generation) with hybrid retrieval to analyze company quarterly/annual reports for key indicators, operating conditions, and potential risks.
+1.3 Systematic Parameter Learning (Backtesting)
+TradingGroup Agents & Carver Principles
+The Stock-Forecasting Agent calculates and analyzes quantitative features relevant to a "big move" (Query Step 1), such as:
+- Technical Indicators
+RSI-14 (overbought/oversold), Distance to SMA (Simple Moving Average), and Historical Volatility (HV-10). These parameters inform the volatility estimation critical to Carver's position sizing.
+- Breakout Thresholds
+The agent uses thresholds inspired by volatility channels (e.g., ATR Channel Breakout strategy) to identify valid breakthroughs or bottom breaks.
+1.4 Storing Stock Learnings
+TradingGroup Data Synthesis
+An end-to-end Data-Synthesis Pipeline automatically captures and labels the outcome of every agent action against actual market results (Query Step 2). This generates "high-quality post-training data":
+- Data Records
+Logs agent inputs, outputs, Chain-of-Thought (CoT) trajectories, account state, and financial outcomes (rewards).
+- Case Memory
+Labels each decision as a "successful" or "failed" case, compiling an "experience summary". This memory forms the basis for the LLM agents' Self-Reflection Mechanism.
+Phase 2: Opportunity Scanning and Forecasting (TradingGroup)
+This phase uses the composite data streams to actively scan the market for high-probability "big move" opportunities (Query Step 3 & 4).
+Step
+Component
+Description and Source Integration
+2.1 Generating a Scaled Forecast
+Stock-Forecasting Agent
+Generates a robust trend assessment by integrating outputs from the news, fundamental, and technical analyses. This prediction is immediately translated into Carver’s required scaled forecast quantity (e.g., expected absolute value of 10, capped at $\pm 20$).
+2.2 Determining Trading Style & Confidence
+Style-Preference Agent
+Analyzes recent performance and current portfolio status to select the most suitable trading style (e.g., aggressive, conservative). This agent uses self-reflection to dynamically adjust its style recommendation based on historical PnL results.
+2.3 Final Decision Integration
+Trading-Decision Agent
+Integrates all upstream signals and the preferred style. It performs final self-reflection by reviewing past profit and loss cases before deciding on the final Buy/Hold/Sell action. This step effectively maintains the list of opportunities by evaluating potential trades against accumulated experience (Query Step 4).
+2.4 Risk Profiling and Volatility Targeting
+Carver's Framework
+The decision to initiate a trade (Query Step 5) is preceded by calculating the necessary risk parameters:
+- Annual Risk Target
+Set the Percentage Volatility Target (risk appetite) based on conservative expectations of the achievable Sharpe Ratio (SR), ideally using Half-Kelly.
+- Daily Risk Target
+Calculate the Daily Cash Volatility Target by dividing the annual target by the square root of time (e.g., dividing by 16 for annual-to-daily conversion).
+Phase 3: Execution and Position Sizing (Carver + TradingGroup)
+Execution must occur only when the probability is high and must strictly adhere to mechanical risk controls (Query Step 5).
+Step
+Component
+Description and Source Integration
+3.1 Volatility Scalar Calculation
+Carver's Framework
+Calculate the Volatility Scalar—the critical factor that translates risk appetite into a position size. This is found by dividing the Daily Cash Volatility Target by the instrument’s Instrument Value Volatility (risk of owning one block in the account currency). The price volatility must be measured objectively (e.g., using a 25-day look-back EWMA).
+3.2 Subsystem Position Sizing
+Carver's Framework
+Calculate the unrounded Subsystem Position (the number of blocks to trade) using the formula: $(\text{Volatility Scalar} \times \text{Forecast}) \div 10$. This ensures the position is consistently sized relative to forecast conviction and market volatility.
+3.3 Portfolio Weighting
+Carver's Framework
+If running multiple instruments (subsystems), the position is adjusted by the Instrument Weight (often set via handcrafting based on diversification/correlation) and the Instrument Diversification Multiplier (accounting for portfolio risk reduction).
+3.4 Execution Decision
+Carver's Framework
+The final position is rounded to the nearest integer block, creating the Rounded Target Position. A trade is issued only if the current position is outside the Position Inertia range (e.g., 10% away from the target) to minimize trading costs and overtrading.
+Phase 4: Active Trade Management (TradingGroup + Carver)
+Management involves dynamically adjusting risk and ensuring mechanical exits (Query Step 6).
+Step
+Component
+Description and Source Integration
+4.1 Dynamic Stop-Loss (SL) / Take-Profit (TP) Setting
+TradingGroup Risk Module
+The Risk-Management Module dynamically sets adaptive SL ($T_{SL}$) and TP ($T_{TP}$) thresholds using multipliers tied to the current Trading Style and the recent unannualized standard deviation of returns ($\sigma_{d,10}$). This provides immediate, style-tiered risk control.
+4.2 Continuous PnL Monitoring and Hard Intercept
+TradingGroup Risk Module
+The system monitors the unrealized PnL percentage and immediately triggers a forced exit (hard intercept) if it breaches the set $T_{SL}$ or $T_{TP}$ thresholds.
+4.3 Systematic Position Adjustment
+Carver's Framework
+Periodically, the system recalculates the Volatility Scalar and Subsystem Position (Step 3.1-3.2). This automatically triggers trades to adjust position size:
+- Risk Maintenance
+The trading capital is checked daily, and if price volatility changes significantly, the position is adjusted to keep the capital at risk constant, preventing sudden increases in exposure.
+- Exit at Target
+If volatility decreases (or capital grows) and the resulting target position requires a reduction (or increase), the system issues a trade to reach the new Rounded Target Position. This mechanism replaces emotional meddling with mechanical self-correction.
