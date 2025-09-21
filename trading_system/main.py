@@ -115,9 +115,11 @@ def run_system_for_ticker(ticker: str, data: pd.DataFrame = None, date_str: str 
     # Phase 4
     risk_thresholds = None
     if target_position != 0:
+        direction = "long" if target_position > 0 else "short"
         risk_thresholds = run_phase4_risk_management(
             instrument_price=last_day_metrics.get(('Close', ticker)),
             volatility=last_day_metrics.get((f'EWMA_Volatility_36_pct', '')),
+            direction=direction,
             style=trading_style
         )
 

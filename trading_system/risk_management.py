@@ -3,10 +3,11 @@ from typing import Dict
 def calculate_dynamic_thresholds(
     instrument_price: float,
     volatility: float,
+    direction: str,
     style: str = 'conservative'
 ) -> Dict[str, float]:
     """
-    Calculates dynamic stop-loss and take-profit thresholds.
+    Calculates dynamic stop-loss and take-profit thresholds based on trade direction.
     """
 
     # Multipliers tied to trading style (mock values)
@@ -20,8 +21,15 @@ def calculate_dynamic_thresholds(
     sl_distance = instrument_price * volatility / 100 * multipliers['sl']
     tp_distance = instrument_price * volatility / 100 * multipliers['tp']
 
-    stop_loss_price = instrument_price - sl_distance
-    take_profit_price = instrument_price + tp_distance
+    if direction == "long":
+        stop_loss_price = instrument_price - sl_distance
+        take_profit_price = instrument_price + tp_distance
+    elif direction == "short":
+        stop_loss_price = instrument_price + sl_distance
+        take_profit_price = instrument_price - tp_distance
+    else: # Default to long if direction is somehow invalid
+        stop_loss_price = instrument_price - sl_distance
+        take_profit_price = instrument_price + tp_distance
 
     return {
         "stop_loss": stop_loss_price,
@@ -31,6 +39,7 @@ def calculate_dynamic_thresholds(
 def run_phase4_risk_management(
     instrument_price: float,
     volatility: float, # Unannualized standard deviation of returns
+    direction: str,
     style: str
 ):
     """
@@ -38,8 +47,9 @@ def run_phase4_risk_management(
     """
     print("\n--- Phase 4: Active Trade Management ---")
 
-    thresholds = calculate_dynamic_thresholds(instrument_price, volatility, style)
+    thresholds = calculate_dynamic_thresholds(instrument_price, volatility, direction, style)
 
+    print(f"Trade Direction: {direction}")
     print(f"Dynamic Stop-Loss Price: ${thresholds['stop_loss']:,.2f}")
     print(f"Dynamic Take-Profit Price: ${thresholds['take_profit']:,.2f}")
 
