@@ -32,15 +32,36 @@ def financial_report_agent(ticker: str) -> Dict[str, Any]:
         "potential_risks": ["Market competition", "Regulatory changes"]
     }
 
-def stock_forecasting_agent(ticker: str, technical_metrics: Dict[str, float]) -> Dict[str, Any]:
+def stock_forecasting_agent(ticker: str, technical_metrics: Dict[str, float], date_str: str) -> Dict[str, Any]:
     """
     Analyzes stock data using a generative AI model to forecast the next day's trend.
+    Includes file-based caching to avoid redundant API calls.
     """
+    # Caching setup
+    cache_dir = "forecast_cache"
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_file = os.path.join(cache_dir, f"{ticker}_{date_str}.json")
+
+    # Check if forecast is in cache
+    if os.path.exists(cache_file):
+        with open(cache_file, 'r') as f:
+            return json.load(f)
+
     if not GEMINI_API_KEY_CONFIGURED:
-        return {
-            'P_up': 0.33, 'P_down': 0.33, 'P_side': 0.34, 'trend': 'sideways',
-            'reasoning': "Mock forecast due to missing Gemini API key."
+        # Improved mock agent for testing: returns a random trend
+        trends = ['uptrend', 'downtrend', 'sideways']
+        mock_trend = np.random.choice(trends)
+        forecast = {
+            'P_up': 0.8 if mock_trend == 'uptrend' else 0.1,
+            'P_down': 0.8 if mock_trend == 'downtrend' else 0.1,
+            'P_side': 0.8 if mock_trend == 'sideways' else 0.1,
+            'trend': mock_trend,
+            'reasoning': f"Mock forecast ({mock_trend}) due to missing Gemini API key."
         }
+        # Save mock forecast to cache for consistency in testing
+        with open(cache_file, 'w') as f:
+            json.dump(forecast, f)
+        return forecast
 
     model = genai.GenerativeModel('gemini-1.5-flash')
 
@@ -68,18 +89,21 @@ The output must be only the JSON object, without any markdown formatting like ``
 
     try:
         response = model.generate_content(prompt)
-
         response_text = response.text.strip()
+
+        # Clean the response to ensure it's valid JSON
         if response_text.startswith("```json"):
-            response_text = response_text[7:]
-        if response_text.endswith("```"):
-            response_text = response_text[:-3]
+            response_text = response_text[7:-3].strip()
 
         forecast = json.loads(response_text)
 
         required_keys = ["P_up", "P_down", "P_side", "trend", "reasoning"]
         if not all(key in forecast for key in required_keys):
             raise ValueError("Forecast JSON is missing required keys.")
+
+        # Save the successful forecast to cache
+        with open(cache_file, 'w') as f:
+            json.dump(forecast, f, indent=4)
 
         return forecast
 
