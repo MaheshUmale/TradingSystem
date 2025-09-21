@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Generated learning files
+learnings/
+
+# Environment files
+.env
+.venv/
+env/
+venv/
+ENV/
+
+# IDE files
+.idea/
+.vscode/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
