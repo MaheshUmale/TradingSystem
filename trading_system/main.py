@@ -80,7 +80,7 @@ class LearningStore:
         with open(file_path, 'w') as f:
             json.dump(result_data, f, indent=4)
 
-def run_system_for_ticker(ticker: str, data: pd.DataFrame = None) -> Dict[str, Any]:
+def run_system_for_ticker(ticker: str, data: pd.DataFrame = None, date_str: str = None) -> Dict[str, Any]:
     """
     Runs the full trading system for a single ticker and returns the results.
     Can take a pre-fetched DataFrame for backtesting.
@@ -92,7 +92,12 @@ def run_system_for_ticker(ticker: str, data: pd.DataFrame = None) -> Dict[str, A
 
     # Phase 2
     last_day_metrics = params_df.iloc[-1].to_dict()
-    agent_forecast = stock_forecasting_agent(ticker, last_day_metrics)
+
+    # Use provided date_str for caching, otherwise use the latest date from the data
+    if date_str is None:
+        date_str = params_df.index[-1].strftime("%Y-%m-%d")
+
+    agent_forecast = stock_forecasting_agent(ticker, last_day_metrics, date_str)
     trading_style = style_preference_agent()
 
     trend_map = {'uptrend': 10.0, 'downtrend': -10.0, 'sideways': 0.0}
@@ -110,9 +115,11 @@ def run_system_for_ticker(ticker: str, data: pd.DataFrame = None) -> Dict[str, A
     # Phase 4
     risk_thresholds = None
     if target_position != 0:
+        direction = "long" if target_position > 0 else "short"
         risk_thresholds = run_phase4_risk_management(
             instrument_price=last_day_metrics.get(('Close', ticker)),
             volatility=last_day_metrics.get((f'EWMA_Volatility_36_pct', '')),
+            direction=direction,
             style=trading_style
         )
 

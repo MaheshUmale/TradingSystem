@@ -5,6 +5,7 @@ __pycache__/
 # Generated learning files
 learnings/
 backtest_learnings/
+forecast_cache/
 
 # Environment files
 .env
