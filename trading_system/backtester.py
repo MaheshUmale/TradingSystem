@@ -123,12 +123,8 @@ def run_trading_backtest(ticker: str, start_date: str, end_date: str, initial_ca
                     "entry_price": entry_price,
                     "size": position,
                     "stop_loss": signal['stop_loss'],
-<<<<<<< HEAD
                     "take_profit": signal['take_profit'],
                     "reasoning": signal.get('reasoning', 'N/A') # Add the reasoning for the trade
-=======
-                    "take_profit": signal['take_profit']
->>>>>>> origin/main
                 }
 
         # c. Update daily equity and drawdown

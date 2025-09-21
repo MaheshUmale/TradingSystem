@@ -5,13 +5,7 @@ import google.generativeai as genai
 from typing import Dict, Any
 import time
 
-# Configure the Gemini API key
-try:
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-    GEMINI_API_KEY_CONFIGURED = True
-except KeyError:
-    print("Warning: GEMINI_API_KEY not found in environment variables. Agents will use mock data.")
-    GEMINI_API_KEY_CONFIGURED = False
+# No longer configure API key at the module level
 
 def news_sentiment_agent(ticker: str) -> float:
     """
@@ -47,7 +41,15 @@ def stock_forecasting_agent(ticker: str, technical_metrics: Dict[str, float], da
         with open(cache_file, 'r') as f:
             return json.load(f)
 
-    if not GEMINI_API_KEY_CONFIGURED:
+    # Configure the Gemini API key, checking each time
+    try:
+        genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+        gemini_api_key_configured = True
+    except KeyError:
+        gemini_api_key_configured = False
+
+
+    if not gemini_api_key_configured:
         # Improved mock agent for testing: returns a random trend
         trends = ['uptrend', 'downtrend', 'sideways']
         mock_trend = np.random.choice(trends)
