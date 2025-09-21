@@ -6,7 +6,6 @@ __pycache__/
 learnings/
 backtest_learnings/
 forecast_cache/
-backtest_results/
 
 # Environment files
 .env
