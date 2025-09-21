@@ -3,6 +3,7 @@ import json
 import numpy as np
 import google.generativeai as genai
 from typing import Dict, Any
+import time
 
 # Configure the Gemini API key
 try:
@@ -66,7 +67,6 @@ The output must be only the JSON object, without any markdown formatting like ``
 """
 
     try:
-        print(f"[{ticker}] Stock-Forecasting Agent: Querying Gemini API for forecast...")
         response = model.generate_content(prompt)
 
         response_text = response.text.strip()
@@ -81,7 +81,6 @@ The output must be only the JSON object, without any markdown formatting like ``
         if not all(key in forecast for key in required_keys):
             raise ValueError("Forecast JSON is missing required keys.")
 
-        print(f"[{ticker}] Stock-Forecasting Agent: Forecast received - Trend: {forecast['trend']}")
         return forecast
 
     except Exception as e:
@@ -90,6 +89,10 @@ The output must be only the JSON object, without any markdown formatting like ``
             'P_up': 0.33, 'P_down': 0.33, 'P_side': 0.34, 'trend': 'sideways',
             'reasoning': f"Error during generation: {e}"
         }
+    finally:
+        # Add a delay to respect the API rate limit (15 requests per minute for free tier)
+        time.sleep(4)
+
 
 def style_preference_agent() -> str:
     """

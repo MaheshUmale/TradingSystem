@@ -16,12 +16,21 @@ from trading_system.agents import (
 from trading_system.execution import run_phase3_execution
 from trading_system.risk_management import run_phase4_risk_management
 
-def calculate_systematic_parameters(ticker: str, lookback_L: int = 20, rsi_L: int = 14) -> pd.DataFrame:
+def calculate_systematic_parameters(
+    ticker: str,
+    data: pd.DataFrame = None,
+    lookback_L: int = 20,
+    rsi_L: int = 14
+) -> pd.DataFrame:
     """
     Calculates essential systematic and technical parameters for a given stock.
-    Handles yfinance multi-level columns by default.
+    If a DataFrame is provided, it uses it; otherwise, it downloads the data.
     """
-    df = yf.download(ticker, period="1y", progress=False, auto_adjust=True)
+    if data is None:
+        df = yf.download(ticker, period="1y", progress=False, auto_adjust=True)
+    else:
+        df = data.copy()
+
     if df.empty:
         return pd.DataFrame()
 
@@ -30,6 +39,13 @@ def calculate_systematic_parameters(ticker: str, lookback_L: int = 20, rsi_L: in
     high_col = ('High', ticker)
     low_col = ('Low', ticker)
     log_returns_col = ('Log_Returns', '')
+
+    # Ensure all required columns exist, create if they don't
+    if close_col not in df.columns:
+        if 'Close' in df.columns: # Handle single-level columns from other sources
+             df.rename(columns={'Close': close_col, 'High': high_col, 'Low': low_col, 'Open': ('Open', ticker), 'Volume': ('Volume', ticker)}, inplace=True)
+        else:
+            return pd.DataFrame() # Not enough data
 
     # Calculate indicators using tuple-based column access
     df[log_returns_col] = np.log(df[close_col] / df[close_col].shift(1))
@@ -64,12 +80,13 @@ class LearningStore:
         with open(file_path, 'w') as f:
             json.dump(result_data, f, indent=4)
 
-def run_system_for_ticker(ticker: str) -> Dict[str, Any]:
+def run_system_for_ticker(ticker: str, data: pd.DataFrame = None) -> Dict[str, Any]:
     """
     Runs the full trading system for a single ticker and returns the results.
+    Can take a pre-fetched DataFrame for backtesting.
     """
     # Phase 1
-    params_df = calculate_systematic_parameters(ticker)
+    params_df = calculate_systematic_parameters(ticker, data=data)
     if params_df.empty:
         return None
 
