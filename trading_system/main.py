@@ -98,11 +98,14 @@ def run_system_for_ticker(ticker: str, data: pd.DataFrame = None, date_str: str 
         date_str = params_df.index[-1].strftime("%Y-%m-%d")
 
     agent_forecast = stock_forecasting_agent(ticker, last_day_metrics, date_str)
+    print(f"[{ticker}] Agent Forecast: {agent_forecast}")
+    
     trading_style = style_preference_agent()
 
     trend_map = {'uptrend': 10.0, 'downtrend': -10.0, 'sideways': 0.0}
+    print(f"[{ticker}] agent_forecast =============================================================  : {agent_forecast}")
     scaled_forecast = trend_map.get(agent_forecast.get('trend'), 0.0)
-
+    print(f"[{ticker}] Scaled Forecast: {scaled_forecast}")
     # Phase 3
     target_position = run_phase3_execution(
         forecast=scaled_forecast,

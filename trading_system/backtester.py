@@ -1,9 +1,24 @@
+import sys
+import os
+# Add the parent directory of your package to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+
+        
 import yfinance as yf
 import pandas as pd
 import numpy as np
 import json
 import os
 from datetime import datetime, timedelta
+
+
+import os                                                                                                                                                                                                          
+from dotenv import load_dotenv, find_dotenv
+from pathlib import Path
+load_dotenv(Path("./.env"))
+print(os.getenv("GEMINI_API_KEY"))
+
 
 from trading_system.main import calculate_systematic_parameters, run_system_for_ticker
 from trading_system.agents import stock_forecasting_agent
@@ -31,6 +46,7 @@ def run_trading_backtest(ticker: str, start_date: str, end_date: str, initial_ca
     if not isinstance(full_data.columns, pd.MultiIndex):
         full_data.columns = pd.MultiIndex.from_product([full_data.columns, [ticker]])
 
+    print(f"Downloaded {len(full_data)} rows of data for {ticker} from {extended_start_date} to {end_date}." )
     # 2. Initialization
     capital = initial_capital
     position = 0
@@ -276,8 +292,8 @@ if __name__ == "__main__":
     # symbols_to_run = NIFTY_50_SYMBOLS[:5]
     symbols_to_run = NIFTY_50_SYMBOLS
 
-    START_DATE = "2023-01-01"
-    END_DATE = "2023-12-31"
+    START_DATE = "2025-05-01"
+    END_DATE = "2025-09-22"
 
     for ticker in symbols_to_run:
         results = run_trading_backtest(ticker, START_DATE, END_DATE)
